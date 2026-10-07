@@ -27,7 +27,7 @@ from app.config import obtener_configuracion  # noqa: E402
 from app.db import Base, engine  # noqa: E402
 from app import modelos  # noqa: E402,F401
 from app.main import create_app  # noqa: E402
-from app.modelos import Tienda  # noqa: E402
+from app.modelos import Tienda, Usuario  # noqa: E402
 from app.reloj import obtener_reloj  # noqa: E402
 
 obtener_configuracion.cache_clear()
@@ -101,3 +101,76 @@ def tienda(db):
     db.commit()
     db.refresh(tienda)
     return tienda
+
+
+@pytest.fixture
+def otra_tienda(db):
+    tienda = Tienda(nombre="Otra tienda", ciudad="Arequipa")
+    db.add(tienda)
+    db.commit()
+    db.refresh(tienda)
+    return tienda
+
+
+@pytest.fixture
+def fabrica_usuario(db):
+    from app.modelos import Estado
+    from app.seguridad.contrasenas import hash_contrasena
+
+    contador = {"n": 0}
+
+    def _crear(tienda, rol, estado=Estado.ACTIVO, email=None, contrasena="Demo1234!"):
+        contador["n"] += 1
+        email = email or f"usuario{contador['n']}@test.pe"
+        usuario = Usuario(
+            email=email,
+            nombre_completo="Usuario de prueba",
+            password_hash=hash_contrasena(contrasena),
+            tienda_id=tienda.id,
+            rol=rol,
+            estado=estado,
+        )
+        db.add(usuario)
+        db.commit()
+        db.refresh(usuario)
+        return usuario
+
+    return _crear
+
+
+@pytest.fixture
+def fabrica_producto(db):
+    from decimal import Decimal
+
+    from app.modelos import Producto
+
+    contador = {"n": 0}
+
+    def _crear(tienda, sku=None, nombre="Producto de prueba", precio="100.00", stock=10):
+        contador["n"] += 1
+        sku = sku or f"SKU-{contador['n']}"
+        producto = Producto(
+            tienda_id=tienda.id,
+            sku=sku,
+            nombre=nombre,
+            descripcion="Descripcion",
+            precio=Decimal(precio),
+            stock=stock,
+        )
+        db.add(producto)
+        db.commit()
+        db.refresh(producto)
+        return producto
+
+    return _crear
+
+
+@pytest.fixture
+def autenticar(cliente):
+    from app.seguridad.jwt import crear_token
+
+    def _autenticar(usuario):
+        token = crear_token(usuario.id, usuario.token_version, datetime.now(timezone.utc))
+        cliente.cookies.set("techstore_token", token)
+
+    return _autenticar

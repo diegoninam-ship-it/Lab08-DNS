@@ -1,4 +1,4 @@
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class TiendaSalida(BaseModel):
@@ -7,3 +7,13 @@ class TiendaSalida(BaseModel):
     id: int
     nombre: str
     ciudad: str
+
+
+class TiendaCrearEntrada(BaseModel):
+    nombre: str = Field(min_length=1, max_length=120)
+    ciudad: str = Field(min_length=1, max_length=120)
+
+
+class TiendaEditarEntrada(BaseModel):
+    nombre: str = Field(min_length=1, max_length=120)
+    ciudad: str = Field(min_length=1, max_length=120)

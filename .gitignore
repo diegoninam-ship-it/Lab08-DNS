@@ -1,0 +1,23 @@
+# Secretos
+.env
+
+# Python
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Node / frontend
+node_modules/
+dist/
+
+# E2E
+test-results/
+playwright-report/
+
+# Editores / SO
+.vscode/
+.idea/
+Thumbs.db

@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 
 from app.config import obtener_configuracion
-from app.routers import auth, oauth, salud, tiendas
+from app.routers import auth, oauth, productos, salud, tiendas
 from app.seguridad.csrf import ExigirContentTypeJsonMiddleware
 
 
@@ -15,6 +15,7 @@ def create_app() -> FastAPI:
     app.include_router(tiendas.router, prefix="/api")
     app.include_router(auth.router, prefix="/api")
     app.include_router(oauth.router, prefix="/api")
+    app.include_router(productos.router, prefix="/api")
 
     return app
 

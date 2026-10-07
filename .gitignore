@@ -12,6 +12,7 @@ htmlcov/
 # Node / frontend
 node_modules/
 dist/
+*.tsbuildinfo
 
 # E2E
 test-results/

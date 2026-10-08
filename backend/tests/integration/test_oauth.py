@@ -50,7 +50,14 @@ def _iniciar_login_social(cliente):
     return state
 
 
-def test_login_social_proveedor_no_configurado_devuelve_503(cliente):
+def test_login_social_proveedor_no_configurado_devuelve_503(cliente, monkeypatch):
+    # No depende de que el .env real tenga o no credenciales configuradas:
+    # simula explicitamente la ausencia de configuracion para el proveedor.
+    def _sin_configurar(nombre):
+        raise oauth_proveedores.ProveedorOAuthNoConfiguradoError()
+
+    monkeypatch.setattr(oauth_proveedores, "obtener_proveedor", _sin_configurar)
+
     respuesta = cliente.get("/api/auth/oauth/google/login", follow_redirects=False)
 
     assert respuesta.status_code == 503
@@ -236,3 +243,22 @@ def test_cookie_state_es_de_un_solo_uso(cliente, monkeypatch, db, tienda):
         follow_redirects=False,
     )
     assert "error=estado_invalido" in segunda.headers["location"]
+
+
+def test_callback_proveedor_desconfigurado_entre_login_y_callback_redirige_con_error(cliente, monkeypatch):
+    _simular_proveedor(monkeypatch, ProveedorFalso())
+    state = _iniciar_login_social(cliente)
+
+    def _sin_configurar(nombre):
+        raise oauth_proveedores.ProveedorOAuthNoConfiguradoError()
+
+    monkeypatch.setattr(oauth_proveedores, "obtener_proveedor", _sin_configurar)
+
+    respuesta = cliente.get(
+        "/api/auth/oauth/google/callback",
+        params={"code": "codigo-valido", "state": state},
+        follow_redirects=False,
+    )
+
+    assert respuesta.status_code == 302
+    assert "error=proveedor_no_configurado" in respuesta.headers["location"]

@@ -98,7 +98,10 @@ export function Mfa() {
         if (err.intentos_restantes !== undefined) {
           setError(`${err.detail}. Intentos restantes: ${err.intentos_restantes}`);
         } else {
-          setError(err.detail);
+          // Desafio agotado, expirado o invalido: no hay forma de continuar
+          // en esta pantalla, hay que volver a iniciar sesion desde cero.
+          navegar("/login", { state: { mensaje: err.detail } });
+          return;
         }
       } else {
         setError("Ocurrio un error inesperado");

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router";
+import { Link, useLocation, useNavigate, useSearchParams } from "react-router";
 import { api, ErrorApiError } from "../api/cliente";
 import type { PasoLogin } from "../tipos";
 
@@ -20,8 +20,13 @@ export function Login() {
   const [cargando, setCargando] = useState(false);
   const navegar = useNavigate();
   const [parametros] = useSearchParams();
+  const location = useLocation();
 
   const errorOauth = parametros.get("error");
+  const mensajeNavegacion =
+    location.state && typeof location.state === "object" && "mensaje" in location.state
+      ? String((location.state as { mensaje: string }).mensaje)
+      : null;
 
   async function manejarEnvio(evento: FormEvent) {
     evento.preventDefault();
@@ -51,6 +56,7 @@ export function Login() {
             {MENSAJES_ERROR_OAUTH[errorOauth] ?? "No se pudo completar el inicio de sesion social."}
           </p>
         )}
+        {mensajeNavegacion && <p className="alerta-error">{mensajeNavegacion}</p>}
         {error && <p className="alerta-error">{error}</p>}
 
         <label>

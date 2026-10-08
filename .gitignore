@@ -17,6 +17,7 @@ dist/
 # E2E
 test-results/
 playwright-report/
+frontend/e2e/.estado/
 
 # Editores / SO
 .vscode/

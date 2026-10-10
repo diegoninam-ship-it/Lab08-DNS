@@ -23,3 +23,7 @@ frontend/e2e/.estado/
 .vscode/
 .idea/
 Thumbs.db
+
+.CONTEXT
+
+.claude/
